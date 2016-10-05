@@ -216,19 +216,25 @@ static std::string get_install()
     return install;
 }
 
+#define STRINGIZEIMP(x) #x
+#define STRINGIZE(x) STRINGIZEIMP(x)
+
 #ifndef INSTALL
 
 static const std::string install = get_install();
 
 #else   // INSTALL
 
-#define STRINGIZEIMP(x) #x
-#define STRINGIZE(x) STRINGIZEIMP(x)
-
 static const std::string install = STRINGIZE(INSTALL) +
                                    std::string(1, folder_delimiter) + "tzdata";
 
 #endif  // INSTALL
+
+#ifdef TAR_PATH
+std::string const tar_path = STRINGIZE(TAR_PATH);
+#else
+std::string const tar_path =  "/usr/bin/tar";
+#endif
 
 static
 std::string
@@ -2673,7 +2679,7 @@ extract_gz_file(const std::string&, const std::string& gz_file, const std::strin
 #if USE_SHELL_API
     bool unzipped = std::system(("tar -xzf " + gz_file + " -C " + install).c_str()) == EXIT_SUCCESS;
 #else  // !USE_SHELL_API
-    const char prog[] = {"/usr/bin/tar"};
+    const char *prog = tar_path.c_str();
     const char*const args[] =
     {
         prog, "-xzf", gz_file.c_str(), "-C", install.c_str(), nullptr
