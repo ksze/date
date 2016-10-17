@@ -3873,7 +3873,7 @@ template <class Rep, class Period,
 CONSTCD11
 inline
 time_of_day<std::chrono::duration<Rep, Period>>
-make_time(std::chrono::duration<Rep, Period> d) NOEXCEPT
+make_time(const std::chrono::duration<Rep, Period>& d)
 {
     return time_of_day<std::chrono::duration<Rep, Period>>(d);
 }
@@ -3881,7 +3881,7 @@ make_time(std::chrono::duration<Rep, Period> d) NOEXCEPT
 CONSTCD11
 inline
 time_of_day<std::chrono::hours>
-make_time(std::chrono::hours h, unsigned md) NOEXCEPT
+make_time(const std::chrono::hours& h, unsigned md)
 {
     return time_of_day<std::chrono::hours>(h, md);
 }
@@ -3889,7 +3889,8 @@ make_time(std::chrono::hours h, unsigned md) NOEXCEPT
 CONSTCD11
 inline
 time_of_day<std::chrono::minutes>
-make_time(std::chrono::hours h, std::chrono::minutes m, unsigned md) NOEXCEPT
+make_time(const std::chrono::hours& h, const std::chrono::minutes& m,
+          unsigned md)
 {
     return time_of_day<std::chrono::minutes>(h, m, md);
 }
@@ -3897,8 +3898,8 @@ make_time(std::chrono::hours h, std::chrono::minutes m, unsigned md) NOEXCEPT
 CONSTCD11
 inline
 time_of_day<std::chrono::seconds>
-make_time(std::chrono::hours h, std::chrono::minutes m, std::chrono::seconds s,
-          unsigned md) NOEXCEPT
+make_time(const std::chrono::hours& h, const std::chrono::minutes& m,
+          const std::chrono::seconds& s, unsigned md)
 {
     return time_of_day<std::chrono::seconds>(h, m, s, md);
 }
@@ -3909,8 +3910,9 @@ template <class Rep, class Period,
 CONSTCD11
 inline
 time_of_day<std::chrono::duration<Rep, Period>>
-make_time(std::chrono::hours h, std::chrono::minutes m, std::chrono::seconds s,
-          std::chrono::duration<Rep, Period> sub_s, unsigned md) NOEXCEPT
+make_time(const std::chrono::hours& h, const std::chrono::minutes& m,
+          const std::chrono::seconds& s, const std::chrono::duration<Rep, Period>& sub_s,
+          unsigned md)
 {
     return time_of_day<std::chrono::duration<Rep, Period>>(h, m, s, sub_s, md);
 }
@@ -4365,16 +4367,16 @@ parse(std::basic_istream<CharT, Traits>& is,
 template <class Duration, class CharT, class Traits = std::char_traits<CharT>>
 struct parse_local_manip
 {
-    const std::basic_string<CharT, Traits>& format_;
-    local_time<Duration>&                   tp_;
-    std::basic_string<CharT, Traits>*       abbrev_;
-    std::chrono::minutes*                   offset_;
+    const std::basic_string<CharT, Traits> format_;
+    local_time<Duration>&                  tp_;
+    std::basic_string<CharT, Traits>*      abbrev_;
+    std::chrono::minutes*                  offset_;
 
 public:
-    parse_local_manip(const std::basic_string<CharT, Traits>& format,
+    parse_local_manip(std::basic_string<CharT, Traits> format,
                       local_time<Duration>& tp, std::basic_string<CharT, Traits>* abbrev = nullptr,
                       std::chrono::minutes* offset = nullptr)
-        : format_(format)
+        : format_(std::move(format))
         , tp_(tp)
         , abbrev_(abbrev)
         , offset_(offset)
@@ -4394,16 +4396,16 @@ operator>>(std::basic_istream<CharT, Traits>& is,
 template <class Duration, class CharT, class Traits = std::char_traits<CharT>>
 struct parse_sys_manip
 {
-    const std::basic_string<CharT, Traits>& format_;
-    sys_time<Duration>&                     tp_;
-    std::basic_string<CharT, Traits>*       abbrev_;
-    std::chrono::minutes*                   offset_;
+    const std::basic_string<CharT, Traits> format_;
+    sys_time<Duration>&                    tp_;
+    std::basic_string<CharT, Traits>*      abbrev_;
+    std::chrono::minutes*                  offset_;
 
 public:
-    parse_sys_manip(const std::basic_string<CharT, Traits>& format,
+    parse_sys_manip(std::basic_string<CharT, Traits> format,
                     sys_time<Duration>& tp, std::basic_string<CharT, Traits>* abbrev = nullptr,
                     std::chrono::minutes* offset = nullptr)
-        : format_(format)
+        : format_(std::move(format))
         , tp_(tp)
         , abbrev_(abbrev)
         , offset_(offset)
@@ -4490,7 +4492,7 @@ detail::parse_sys_manip<Duration, CharT, Traits>
 parse(const std::basic_string<CharT, Traits>& format, sys_time<Duration>& tp,
       std::chrono::minutes& offset)
 {
-    return {format, tp, &offset};
+    return {format, tp, nullptr, &offset};
 }
 
 template <class CharT, class Traits, class Duration>
@@ -4589,7 +4591,7 @@ detail::parse_local_manip<Duration, CharT, Traits>
 parse(const std::basic_string<CharT, Traits>& format, local_time<Duration>& tp,
       std::chrono::minutes& offset)
 {
-    return {format, tp, &offset};
+    return {format, tp, nullptr, &offset};
 }
 
 template <class CharT, class Traits, class Duration>
