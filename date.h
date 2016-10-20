@@ -318,6 +318,9 @@ public:
     CONSTCD14 year& operator+=(const years& y) NOEXCEPT;
     CONSTCD14 year& operator-=(const years& y) NOEXCEPT;
 
+    CONSTCD11 year operator-() const NOEXCEPT;
+    CONSTCD11 year operator+() const NOEXCEPT;
+
     CONSTCD11 bool is_leap() const NOEXCEPT;
 
     CONSTCD11 explicit operator int() const NOEXCEPT;
@@ -1377,6 +1380,8 @@ CONSTCD14 inline year& year::operator--() NOEXCEPT {--y_; return *this;}
 CONSTCD14 inline year year::operator--(int) NOEXCEPT {auto tmp(*this); --(*this); return tmp;}
 CONSTCD14 inline year& year::operator+=(const years& y) NOEXCEPT {*this = *this + y; return *this;}
 CONSTCD14 inline year& year::operator-=(const years& y) NOEXCEPT {*this = *this - y; return *this;}
+CONSTCD11 inline year year::operator-() const NOEXCEPT {return year{-y_};}
+CONSTCD11 inline year year::operator+() const NOEXCEPT {return *this;}
 
 CONSTCD11
 inline
@@ -4006,6 +4011,7 @@ format(const std::locale& loc, std::basic_string<CharT, Traits> fmt,
                 {
                     auto offset = duration_cast<minutes>(*offset_sec);
                     basic_ostringstream<CharT, Traits> os;
+                    os.imbue(loc);
                     if (offset >= minutes{0})
                         os << '+';
                     os << make_time(offset);
@@ -4042,6 +4048,7 @@ format(const std::locale& loc, std::basic_string<CharT, Traits> fmt,
     }
     auto& f = use_facet<time_put<CharT>>(loc);
     basic_ostringstream<CharT, Traits> os;
+    os.imbue(loc);
     auto ld = floor<days>(tp);
     auto ymd = year_month_day{ld};
     auto hms = make_time(floor<seconds>(tp - ld));
